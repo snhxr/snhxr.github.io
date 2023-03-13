@@ -1,3 +1,2 @@
-# kosameamegai.github.io
-template
-project tempest 
+IZIN YA BG KOSAME
+
