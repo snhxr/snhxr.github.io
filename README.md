@@ -1,2 +1,1 @@
-IZIN YA BG KOSAME
-
+hallo
