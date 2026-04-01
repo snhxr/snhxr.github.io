@@ -1,162 +1,175 @@
+<!-- Subscrbe YouTube Tamzidan Mahdiyin  -->
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 
-    <!-- Basic Page Needs
-    ================================================== -->
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-
-    <title>0X PAGE</title>
-
-    <meta name="description" content="">
-    <meta name="author" content="">
-    <meta name="keywords" content="">
-
-    <!-- Mobile Specific Metas
-    ================================================== -->
-    <meta name="viewport" content="width=device-width, minimum-scale=1.0">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-
-    <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700|Varela" rel="stylesheet">
-
-    <!-- Favicon
-    ================================================== -->
-    <link rel="apple-touch-icon" sizes="144x144" href="assets/img/haruno.jpg" />
-    <link rel="icon" type="image/png" sizes="32x32" href="assets/img/haruno.jpg" />
-    <link rel="icon" type="image/png" sizes="16x16" href="assets/img/haruno.jpg" />
-    <link rel="icon" sizes="16x16" href="assets/img/haruno.jpg" />
-    <link rel="manifest" href="assets/img/manifest.json">
-    <link rel="mask-icon" href="assets/img/safari-pinned-tab.svg" color="#5bbad5">
-    <meta name="theme-color" content="#ffffff">
-
-    <!-- Stylesheets
-    ================================================== -->
-    <!-- Bootstrap core CSS -->
-    <link rel="stylesheet" href="assets/css/bootstrap.min.css" />
-
-    <!-- Font Awesome core CSS -->
-    <link rel="stylesheet" href="assets/css/font-awesome.min.css" />
-    
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="assets/css/style.css">
-
-    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
-    <!--[if lt IE 9]>
-    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-    <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
-    <![endif]-->
-
-<body bgcolor="black" onclick="play()">
-
-
-
-<div class="content">
-
-
-
-<center>
-
-
-
-<audio id="sec" __idm_id__="823202817"> <source src="assets/audio/sakura.mp3"></audio>
-
-
-</center>
-
-
-
-</div>
-
-
-
-<script>
-
-
-
-    var x = document.getElementById("sec");
-
-
-
-    function play() {
-
-
-
-      x.play(); 	
-
-
-
-    } 	 	
-
-
-
-    function myFunction() { 		 
-
-
-
-      var element = document.body; 
-
-
-
-      element.classList.toggle("dark-mode"); 
-
-
-
-    } 
-
-
-
-    function changeImage() { 
-
-
-
-      if (document.getElementById("imgClickAndChange").src == "https://cutewallpaper.org/21/anime-suicidal/Russian-State-Media-Says-Anime-Promotes-Teen-Suicide.jpg") { 
-
-
-
-          document.getElementById("imgClickAndChange").src = "https://cutewallpaper.org/21/anime-suicidal/Russian-State-Media-Says-Anime-Promotes-Teen-Suicide.jpg"; 
-
-
-
-        } 
-
-
-
-      else { document.getElementById("imgClickAndChange").src = "https://cutewallpaper.org/21/anime-suicidal/Russian-State-Media-Says-Anime-Promotes-Teen-Suicide.jpg"; 
-
-
-
-      } 
-
-
-
-    } 
-
-
-
-    </script>
-
-
-
-</body>
-
-
-
-</html>
+    <!-- Pengaturan karakter encoding untuk mendukung semua karakter Unicode -->
+    <meta charset="UTF-8">
+
+    <!-- Pengaturan viewport untuk responsivitas pada perangkat mobile -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- 
+      Import Font Awesome untuk ikon sosial media dan navigasi
+      Versi 6.5.1 dipilih untuk fitur dan ikon terbaru 
+    -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- 
+      Import AOS (Animate On Scroll) library
+      Digunakan untuk membuat animasi scroll yang menarik 
+    -->
+    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+
+    <!-- Import file CSS custom untuk styling tambahan -->
+    <link rel="stylesheet" href="css/style.css">
+    <title>Portfolio Website</title>
 </head>
+
 <body>
 
-    <!-- Hero Section, Background Image change in css -->
-    <div id="top" class="hero background-overlay">
-    
-        <!-- Name & Description -->
-        <div class="hero-content">
-            <h1>I am 0X</h1>
-            <p class="hero-job"><span>heker nub</span></p>
-            <p class="hero-job-desc">JR<p>
+    <!-- 
+      Navigation Section
+      - Menggunakan sistem grid untuk layout
+      - Includes logo dan menu navigasi
+      - Responsive dengan hamburger menu untuk mobile 
+    -->
+    <nav>
+        <div class="nav-container">
 
-<p1> <a href="http://www.zone-h.org/archive/notifier=S4NH4X0R">whoami</a> 
-        </div><!-- /.hero-content -->
+            <!-- 
+              Logo dengan animasi zoom-in
+              data-aos-duration: 1500ms untuk animasi yang smooth 
+            -->
+            <div class="logo" data-aos="zoom-in" data-aos-duration="1500">
+                Tamzidan <span>Mahdiyin</span>
+            </div>
 
-      
+            <!-- 
+              Navigation Links
+              - Menggunakan fade-up animation dengan delays bertingkat
+              - Active class untuk halaman yang sedang aktif 
+            -->
+            <div class="links">
+                <div class="link active" data-aos="fade-up" data-aos-duration="1500" data-aos-delay="100"><a
+                        href="index.html">Home</a></div>
+                <div class="link" data-aos="fade-up" data-aos-duration="1500" data-aos-delay="200"><a
+                        href="about.html">About</a></div>
+                <div class="link" data-aos="fade-up" data-aos-duration="1500" data-aos-delay="300"><a
+                        href="skill.html">Skills</a></div>
+                <div class="link" data-aos="fade-up" data-aos-duration="1500" data-aos-delay="400"><a
+                        href="service.html">Service</a></div>
+                <div class="link" data-aos="fade-up" data-aos-duration="1500" data-aos-delay="500"><a
+                        href="contact.html">Contact</a></div>
+            </div>
+        </div>
+
+        <!-- 
+          Hamburger Menu Icon
+          - Muncul pada tampilan mobile
+          - Menggunakan Font Awesome icon
+          - onClick handler untuk membuka menu 
+        -->
+        <i class="fa-solid fa-bars hamburg" onclick="hamburg()"></i>
+
+        <!-- 
+          Dropdown Menu untuk Mobile
+          - Berisi link navigasi yang sama
+          - Muncul ketika hamburger menu diklik
+          - Includes tombol close (x) 
+        -->
+        <div class="dropdown">
+            <div class="links">
+                <a href="index.html">Home</a>
+                <a href="about.html">About</a>
+                <a href="skill.html">Skills</a>
+                <a href="service.html">Service</a>
+                <a href="contact.html">Contact</a>
+                <i class="fa-solid fa-xmark cancel" onclick="cancel()"></i>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 
+      Main Content Section
+      - Menggunakan grid untuk layout dua kolom
+      - Includes teks intro dan gambar profil 
+    -->
+    <section>
+        <div class="main-container">
+            <!-- 
+              Content Container
+              - Berisi heading, typewriter effect, dan social links
+              - Setiap elemen memiliki animasi AOS yang berbeda 
+            -->
+            <div class="content">
+                <!-- Heading dengan fade-left animation -->
+                <h1 data-aos="fade-left" data-aos-duration="1500" data-aos-delay="700">Hey I'm <span>Tamzidan</span>
+                </h1>
+
+                <!-- 
+                  Typewriter Effect
+                  - Menggunakan JavaScript untuk animasi ketik
+                  - Fade-right animation untuk container 
+                -->
+                <div data-aos="fade-right" data-aos-duration="1500" data-aos-delay="900" class="typewriter">I'm a <span
+                        class="typewriter-text"></span><label for="">|</label></div>
+
+                <!-- Paragraf deskripsi dengan flip-down animation -->
+                <p data-aos="flip-down" data-aos-duration="1500" data-aos-delay="1100">Lorem ipsum dolor sit, amet
+                    consectetur adipisicing elit. Ut fuga officiis corrupti tempora, sapiente a quae alias suscipit
+                    ratione? Eaque obcaecati a ea accusamus sint dignissimos delectus maxime porro tempore!</p>
+
+                <!-- 
+                  Social Media Links
+                  - Menggunakan Font Awesome icons
+                  - Fade-up animation dengan delays bertingkat 
+                -->
+                <div class="social-links">
+                    <a data-aos="fade-up" data-aos-duration="1500" data-aos-delay="1300"><i
+                            class="fa-brands fa-linkedin"></i></a>
+                    <a href="#" data-aos="fade-up" data-aos-duration="1500" data-aos-delay="1400"><i
+                            class="fa-brands fa-github"></i></a>
+                    <a href="#" data-aos="fade-up" data-aos-duration="1500" data-aos-delay="1500"><i
+                            class="fa-brands fa-facebook"></i></a>
+                    <a href="#" data-aos="fade-up" data-aos-duration="1500" data-aos-delay="1600"><i
+                            class="fa-brands fa-twitter"></i></a>
+                </div>
+
+                <!-- 
+                  Download CV Button
+                  - Zoom-out animation dengan delay terpanjang
+                  - Styling didefinisikan di CSS 
+                -->
+                <div class="btn" data-aos="zoom-out" data-aos-duration="1500" data-aos-delay="1800">
+                    <button>Download CV</button>
+                </div>
+            </div>
+
+            <!-- 
+              Image Container
+              - Menggunakan zoom-in animation
+              - Durasi lebih panjang (3000ms) untuk efek dramatic 
+            -->
+            <div class="image" data-aos="zoom-in" data-aos-duration="3000">
+                <img src="img/zoro.jpg" alt="">
+            </div>
+        </div>
+    </section>
+
+    <!-- 
+      Script Imports
+      - AOS library untuk animasi
+      - Custom JavaScript untuk fungsionalitas tambahan 
+    -->
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+    <script>
+        // Inisialisasi AOS dengan offset 0 untuk trigger tepat waktu
+        AOS.init({ offset: 0, });
+    </script>
+    <script src="./js/script.js"></script>
+</body>
+
+</html>
+<!-- Subscrbe YouTube Tamzidan Mahdiyin  -->
