@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>I love meizi</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #050505;
+            overflow: hidden;
+            font-family: sans-serif;
+        }
+        
+        /* Subtle bokeh background */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(0, 255, 255, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(255, 0, 255, 0.03) 0%, transparent 50%);
+            z-index: 0;
+        }
+
+        canvas {
+            display: block;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* PiP Webcam Overlay */
+        #video-container {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 240px;
+            height: 180px;
+            border-radius: 12px;
+            border: 2px solid rgba(0, 255, 255, 0.6);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.4), inset 0 0 10px rgba(0,255,255,0.4);
+            overflow: hidden;
+            z-index: 2;
+            transform: scaleX(-1); /* Mirror the PiP */
+        }
+
+        #webcam {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        #loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #0ff;
+            text-shadow: 0 0 10px #0ff;
+            font-size: 1.5rem;
+            z-index: 10;
+            pointer-events: none;
+            letter-spacing: 2px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="loading">Initializing MediaPipe & AI Models...</div>
+    
+    <canvas id="particle-canvas"></canvas>
+    
+    <div id="video-container">
+        <video id="webcam" autoplay playsinline></video>
+    </div>
+
+    <script type="module">
+        import { HandLandmarker, FilesetResolver } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/vision_bundle.js";
+
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas.getContext('2d');
+        const video = document.getElementById('webcam');
+        const loading = document.getElementById('loading');
+
+        let width, height;
+        let particles = [];
+        const NUM_PARTICLES = 3000;
+        let currentShape = 'IDLE'; 
+        let handScale = 1;
+
+        // Resize handler
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        // --- PARTICLE SYSTEM ---
+        class Particle {
+            constructor() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.tx = this.x;
+                this.ty = this.y;
+                this.vx = 0;
+                this.vy = 0;
+                this.baseSize = Math.random() * 1.5 + 0.5;
+                this.color = `hsl(${Math.random() * 60 + 180}, 100%, 70%)`; // Cyan/Blue base
+                this.friction = 0.88 + Math.random() * 0.04;
+                this.ease = 0.03 + Math.random() * 0.04;
+            }
+
+            update() {
+                let dx = this.tx - this.x;
+                let dy = this.ty - this.y;
+                
+                this.vx += dx * this.ease;
+                this.vy += dy * this.ease;
+                
+                this.vx *= this.friction;
+                this.vy *= this.friction;
+                
+                this.x += this.vx;
+                this.y += this.vy;
+            }
+
+            draw(ctx, scale) {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.baseSize * scale, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        for(let i=0; i<NUM_PARTICLES; i++) particles.push(new Particle());
+
+        // --- PARAMETRIC SHAPE GENERATORS ---
+        function getHeartTarget() {
+            const t = Math.random() * Math.PI * 2;
+            const r = 15;
+            const x = 16 * Math.pow(Math.sin(t), 3);
+            const y = -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
+            return { x: x * r, y: y * r, color: `hsl(${Math.random() * 30 + 330}, 100%, 65%)` }; // Neon Pink/Red
+        }
+
+        function getSaturnTarget() {
+            const isRing = Math.random() > 0.6;
+            if (isRing) {
+                const t = Math.random() * Math.PI * 2;
+                const rX = 250; const rY = 60;
+                // Tilt the ring
+                const angle = 0.3; 
+                let x = rX * Math.cos(t);
+                let y = rY * Math.sin(t);
+                let rotX = x * Math.cos(angle) - y * Math.sin(angle);
+                let rotY = x * Math.sin(angle) + y * Math.cos(angle);
+                return { x: rotX, y: rotY, color: '#f0e68c' };
+            } else {
+                // Sphere
+                const u = Math.random() * Math.PI * 2;
+                const v = Math.acos(Math.random() * 2 - 1);
+                const r = 100;
+                return { x: r * Math.sin(v) * Math.cos(u), y: r * Math.cos(v), color: `hsl(${Math.random() * 40 + 20}, 100%, 60%)` }; // Orange/Gold
+            }
+        }
+
+        // Precise Parametric Text Generator
+        function getParametricLetter(letter, t) {
+            // Returns x, y in range [-1, 1]
+            if (letter === 'I') return { x: 0, y: t * 2 - 1 };
+            if (letter === 'L') {
+                if (t < 0.7) return { x: -0.5, y: (t / 0.7) * 2 - 1 };
+                else return { x: -0.5 + ((t - 0.7) / 0.3), y: 1 };
+            }
+            if (letter === 'O') return { x: Math.cos(t * Math.PI * 2) * 0.8, y: Math.sin(t * Math.PI * 2) };
+            if (letter === 'V') {
+                if (t < 0.5) return { x: -0.8 + (t * 2) * 0.8, y: -1 + (t * 2) * 2 };
+                else return { x: ((t - 0.5) * 2) * 0.8, y: 1 - ((t - 0.5) * 2) * 2 };
+            }
+            if (letter === 'E') {
+                if (t < 0.4) return { x: -0.8, y: (t / 0.4) * 2 - 1 };
+                if (t < 0.6) return { x: -0.8 + ((t - 0.4) / 0.2) * 1.6, y: -1 };
+                if (t < 0.8) return { x: -0.8 + ((t - 0.6) / 0.2) * 1.2, y: 0 };
+                return { x: -0.8 + ((t - 0.8) / 0.2) * 1.6, y: 1 };
+            }
+            if (letter === 'Y') {
+                if (t < 0.33) return { x: -0.8 + (t * 3) * 0.8, y: -1 + (t * 3) };
+                if (t < 0.66) return { x: 0.8 - ((t - 0.33) * 3) * 0.8, y: -1 + ((t - 0.33) * 3) };
+                return { x: 0, y: ((t - 0.66) * 3) };
+            }
+            if (letter === 'U') {
+                if (t < 0.4) return { x: -0.8, y: -1 + (t / 0.4) * 1.5 };
+                if (t < 0.6) {
+                    const ang = Math.PI - ((t - 0.4) / 0.2) * Math.PI;
+                    return { x: Math.cos(ang) * 0.8, y: 0.5 + Math.sin(ang) * 0.5 };
+                }
+                return { x: 0.8, y: 0.5 - ((t - 0.6) / 0.4) * 1.5 };
+            }
+            if (letter === 'S') {
+                // Smooth perfect curves using interlocking arcs
+                if (t < 0.5) {
+                    // Top arc
+                    const ang = -Math.PI/4 + (t * 2) * (Math.PI * 1.5);
+                    return { x: Math.cos(ang) * 0.5, y: -0.4 - Math.sin(ang) * 0.5 };
+                } else {
+                    // Bottom arc
+                    const ang = Math.PI/4 + ((t - 0.5) * 2) * (Math.PI * 1.5);
+                    return { x: -Math.cos(ang) * 0.5, y: 0.4 + Math.sin(ang) * 0.5 };
+                }
+            }
+            return { x: 0, y: 0 }; // Default/Spaces
+        }
+
+        function getTextTarget(textStr) {
+            const chars = textStr.split('');
+            const charIdx = Math.floor(Math.random() * chars.length);
+            const char = chars[charIdx];
+            
+            if (char === ' ') return { x: Math.random() * 200 - 100, y: Math.random() * 200 - 100, color: 'transparent' };
+
+            const t = Math.random();
+            const pt = getParametricLetter(char, t);
+            
+            const charSpacing = 60;
+            const totalWidth = chars.length * charSpacing;
+            const startX = -totalWidth / 2 + charSpacing / 2;
+            
+            const x = startX + (charIdx * charSpacing) + (pt.x * 20);
+            const y = pt.y * 30;
+
+            return { x: x * 2, y: y * 2, color: '#00ffff' };
+        }
+
+        function getIdleTarget() {
+            // Gentle ambient sphere
+            const t = Math.random() * Math.PI * 2;
+            const r = Math.random() * 200;
+            return { x: Math.cos(t) * r, y: Math.sin(t) * r, color: '#222' };
+        }
+
+        // --- MEDIAPIPE INITIALIZATION ---
+        let handLandmarker;
+        async function initAI() {
+            const vision = await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/wasm");
+            handLandmarker = await HandLandmarker.createFromOptions(vision, {
+                baseOptions: {
+                    modelAssetPath: "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task",
+                    delegate: "GPU"
+                },
+                runningMode: "VIDEO",
+                numHands: 1
+            });
+
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            video.srcObject = stream;
+            video.addEventListener("loadeddata", () => {
+                loading.style.display = "none";
+                detectHands();
+            });
+        }
+
+        // --- GESTURE DETECTION (Throttled) ---
+        let lastDetectTime = 0;
+        function detectHands() {
+            const now = performance.now();
+            if (now - lastDetectTime >= 40) { // Throttled to ~25fps for ML, rendering is 60fps
+                lastDetectTime = now;
+                const results = handLandmarker.detectForVideo(video, now);
+                
+                if (results.landmarks && results.landmarks.length > 0) {
+                    const lms = results.landmarks[0];
+                    
+                    // Simple finger state calculation
+                    const fingers = [];
+                    fingers.push(lms[4].x < lms[3].x ? 1 : 0); // Thumb (crude approximation)
+                    fingers.push(lms[8].y < lms[6].y ? 1 : 0); // Index
+                    fingers.push(lms[12].y < lms[10].y ? 1 : 0); // Middle
+                    fingers.push(lms[16].y < lms[14].y ? 1 : 0); // Ring
+                    fingers.push(lms[20].y < lms[18].y ? 1 : 0); // Pinky
+
+                    const count = fingers.reduce((a, b) => a + b, 0);
+
+                    if (count === 0) currentShape = 'SATURN';
+                    else if (count === 1 && fingers[1] === 1) currentShape = 'ILOVEYOU';
+                    else if (count === 2 && fingers[1] === 1 && fingers[2] === 1) currentShape = 'SEEYOU';
+                    else if (count >= 4) currentShape = 'HEART';
+                    else currentShape = 'IDLE';
+
+                    // Calculate scale based on hand bounding box (distance proxy)
+                    const minY = Math.min(...lms.map(l => l.y));
+                    const maxY = Math.max(...lms.map(l => l.y));
+                    const handHeight = maxY - minY;
+                    handScale = 1 + (0.5 - handHeight); // closer hand = bigger shape
+
+                } else {
+                    currentShape = 'IDLE';
+                    handScale = 1;
+                }
+                
+                updateTargets();
+            }
+            requestAnimationFrame(detectHands);
+        }
+
+        function updateTargets() {
+            const cx = width / 2;
+            const cy = height / 2;
+
+            particles.forEach((p, i) => {
+                let target;
+                if (currentShape === 'HEART') target = getHeartTarget();
+                else if (currentShape === 'SATURN') target = getSaturnTarget();
+                else if (currentShape === 'ILOVEYOU') target = getTextTarget("I LOVE YOU");
+                else if (currentShape === 'SEEYOU') target = getTextTarget("SEE YOU");
+                else target = getIdleTarget();
+
+                if (target.color !== 'transparent') {
+                    p.tx = cx + target.x * handScale;
+                    p.ty = cy + target.y * handScale;
+                    p.color = target.color;
+                }
+            });
+        }
+
+        // --- RENDER LOOP (60fps) ---
+        function animate() {
+            ctx.fillStyle = "rgba(5, 5, 5, 0.3)"; // Trail effect
+            ctx.fillRect(0, 0, width, height);
+
+            ctx.globalCompositeOperation = "lighter";
+
+            particles.forEach(p => {
+                p.update();
+                p.draw(ctx, handScale);
+            });
+
+            ctx.globalCompositeOperation = "source-over";
+            requestAnimationFrame(animate);
+        }
+
+        initAI();
+        animate();
+
+    </script>
+</body>
+</html>
